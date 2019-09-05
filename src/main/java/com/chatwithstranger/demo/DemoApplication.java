@@ -17,17 +17,7 @@ public class DemoApplication {
         SpringApplication.run(DemoApplication.class, args);
     }
 
-    /**
-     * Login Page
-     */
-    @GetMapping("/")
-    public ModelAndView viewIndex() {
-        return new ModelAndView("index");
-    }
 
-    /**
-     * Chatroom Page
-     */
     @GetMapping("/index")
     public ModelAndView index(String username, HttpServletRequest request) throws UnknownHostException {
         //TODO: add code for login to chatroom.
