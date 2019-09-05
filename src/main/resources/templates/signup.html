@@ -127,19 +127,10 @@
             padding: 35px;
             color: #EEE;
             position: absolute;
-        }
-
-        .left_box {
-            margin-top: -250px;
-            margin-left: -200px;
+            left: 50%;
             top: 50%;
-            left: 30%;
-        }
-
-        .right-box {
-            top: 35%;
-            right: 30%;
-            margin-right: -200px;
+            margin-left: -200px;
+            margin-top: -250px;
         }
 
         #username {
@@ -154,8 +145,9 @@
     </style>
 </head>
 <body>
-<div class="logo_box left_box">
-    <h3>Open Chat</h3>
+
+<div class="logo_box">
+    <h3>Welcome to join us !!</h3>
     <form>
         <div class="input_outer">
             <span class="u_user"></span>
@@ -163,36 +155,26 @@
         </div>
         <div class="input_outer">
             <span class="u_user"></span>
-            <input class="text" id="password" name="password" placeholder="Enter Password" type="password">
+            <input class="text" id="password1" name="password1" placeholder="Enter Password" type="password">
+        </div>
+        <div class="input_outer">
+            <span class="u_user"></span>
+            <input class="text" id="password2" name="password2" placeholder="Enter Password again" type="password">
         </div>
         <div class="mb2">
-            <a class="act-but submit" onclick="signIn()">Sign in</a>
-        </div>
-        <div class="mb2">
-            <a class="act-but button" href="/signup">Sign up</a>
+            <a class="act-but button" onclick="signUp()">Sign up</a>
         </div>
     </form>
 </div>
-<div class="logo_box right-box body-right">
-    <h3>Random Chat</h3>
-    <div>
-        <a class="start-but button" onclick="goRandom()">Start</a>
-    </div>
-</div>
 <script>
-    function signIn() {
-        alert("signIn");
+    function signUp() {
+
     }
 
-    function goRandom() {
-        alert("goRandom");
-        // TODO : goes to Random chat page
-    }
-
-    // When user press Enter then go to signIn.
+    // When user press Enter then go to signUp.
     document.onkeydown = function (event) {
         var e = event || window.event || arguments.callee.caller.arguments[0];
-        e.keyCode === 13 && signIn();
+        e.keyCode === 13 && signUp();
     };
 </script>
 
