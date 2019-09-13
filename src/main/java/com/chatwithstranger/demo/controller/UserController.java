@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,7 +45,7 @@ public class UserController {
             out.flush();
             return createNewModelAndView("signup", null, null);
         } else {
-            User user = User.createWithLastLogin(userVO.getUsername(), userVO.getPassword(), sdf.format(new Date()));
+            User user = User.createWithAllArgs(userVO.getUsername(), userVO.getPassword(), sdf.format(new Date()));
             userService.signupUser(user);
             out.println("<script>alert('welcome!!');</script>");
             out.flush();
@@ -53,22 +54,35 @@ public class UserController {
     }
 
     @PostMapping("/signin")
-    public ModelAndView signinAndDisplayChatView(@ModelAttribute("user") UserVO userVO, HttpServletResponse response) throws IOException {
+    public ModelAndView signinAndDisplayChatView(@ModelAttribute("user") UserVO userVO
+            , HttpServletRequest servletRequest, HttpServletResponse response) throws IOException {
         Optional<User> checkUser = userService.findUserByUsernameAndPassword(userVO.getUsername(), userVO.getPassword());
         response.setContentType("text/html; charset=UTF-8");
         PrintWriter out = response.getWriter();
 
         if (checkUser.isPresent()) {
+            servletRequest.getSession().setAttribute("loginInfo", checkUser.get().getUsername());
+
             out.println("<script>alert('Last Login : " + checkUser.get().getLastLogin() + "');</script>");
             out.flush();
+
             checkUser.get().setLastLogin(sdf.format(new Date()));
             userService.updateUser(checkUser.get());
+
             return createNewModelAndView("chat", userVO, "user");
         } else {
             out.println("<script>alert('incorrect username or password. try again.');</script>");
             out.flush();
             return createNewModelAndView("index", userVO, "user");
         }
+    }
+
+    @GetMapping("/logout")
+    public ModelAndView logoutAndDisplayIndexView(HttpServletRequest servletRequest) {
+        servletRequest.getSession().invalidate();
+        servletRequest.getSession().removeAttribute("loginInfo");
+
+        return createNewModelAndView("index", User.createInitialUser(), "user");
     }
 
     private ModelAndView createNewModelAndView(String viewName, Object attributeValue, String attributeName) {

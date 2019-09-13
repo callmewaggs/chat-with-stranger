@@ -28,7 +28,7 @@ public class User {
         this.lastLogin = lastLogin;
     }
 
-    public static User createWithLastLogin(String username, String password, String lastLogin) {
+    public static User createWithAllArgs(String username, String password, String lastLogin) {
         return new User(username, password, lastLogin);
     }
 

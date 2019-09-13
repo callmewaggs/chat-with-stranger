@@ -6,60 +6,92 @@
     <link rel="stylesheet" th:href="@{/webjars/mdui/dist/css/mdui.css}">
     <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
     <script th:src="@{/webjars/mdui/dist/js/mdui.js}"></script>
+    <style>
+        .container_content {
+            width: 70%;
+            float: left;
+
+        }
+
+        .container_online {
+            width: 30%;
+            float: left;
+        }
+
+        .online {
+            height: 50%
+        }
+
+        .offline {
+            height: 50%
+        }
+
+    </style>
 </head>
 <body class="mdui-theme-primary-indigo mdui-theme-accent-pink">
-
 <div style="margin-left:20px;margin-right:20px">
     <div class="mdui-toolbar mdui-color-theme">
         <span class="mdui-typo-title">Chat Room</span>
         <div class="mdui-toolbar-spacer"></div>
-        <a class="mdui-btn mdui-btn-icon" th:href="@{/}">
+        <a class="mdui-btn mdui-btn-icon" th:href="@{/logout}">
             <i class="mdui-icon material-icons">exit_to_app</i>
         </a>
     </div>
 </div>
 
 <div style="margin-left:20px;margin-right:20px">
-    <div class="container_text">
-        <div class="mdui-row">
-            <div class="mdui-col-xs-12 mdui-col-sm-6">
-                <div class="mdui-col-xs-12 mdui-col-sm-10">
-                    <div class="mdui-textfield-floating-label" style="margin-top:15px">
-                        <i class="mdui-icon">Welcome：</i>
-                        <i class="mdui-icon" id="username" th:text="${username}"></i>
-                    </div>
-                </div>
-                <div class="mdui-col-xs-12 mdui-col-sm-10">
-                    <div class="mdui-textfield mdui-textfield-floating-label">
-                        <i class="mdui-icon material-icons">textsms</i>
-                        <label class="mdui-textfield-label">Send Text</label>
-                        <input class="mdui-textfield-input" id="msg"/>
-                    </div>
-                    <div class="mdui-container" style="padding:20px 35px">
-                        <!-- TODO: add a send button to send message -->
-                        <button class="mdui-btn mdui-color-theme mdui-ripple"
-                                onclick="clearMsg()">Clear
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mdui-col-xs-6 mdui-col-sm-5" style="padding:10px 0">
-                <div class="mdui-chip">
+    <div class="container_content">
+        <div class="mdui-chip">
                     <span class="mdui-chip-icon mdui-color-blue">
                         <i class="mdui-icon material-icons">&#xe420;</i></span>
-                    <span class="mdui-chip-title">Content</span>
+            <span class="mdui-chip-title">Content</span>
+        </div>
+        <div class="container_text">
+            <div class="mdui-row">
+                <div class="mdui-col-xs-12 mdui-col-sm-6">
+                    <div class="mdui-col-xs-12 mdui-col-sm-10">
+                        <div class="mdui-textfield-floating-label" style="margin-top:15px">
+                            <i class="mdui-icon">Welcome：</i>
+                            <i class="mdui-icon" id="username" th:text="${username}"></i>
+                        </div>
+                    </div>
+                    <div class="mdui-col-xs-12 mdui-col-sm-10">
+                        <div class="mdui-textfield mdui-textfield-floating-label">
+                            <i class="mdui-icon material-icons">textsms</i>
+                            <label class="mdui-textfield-label">Send Text</label>
+                            <input class="mdui-textfield-input" id="msg"/>
+                        </div>
+                        <div class="mdui-container" style="padding:20px 35px">
+                            <!-- TODO: add a send button to send message -->
+                            <button class="mdui-btn mdui-color-theme mdui-ripple"
+                                    onclick="clearMsg()">Clear
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mdui-chip">
+                <div class="mdui-col-xs-6 mdui-col-sm-5" style="padding:10px 0">
+                    <!-- TODO: add a message container -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container_online">
+        <div class="online">
+            <div class="mdui-chip">
                     <span class="mdui-chip-icon mdui-color-blue">
                         <i class="mdui-icon material-icons">face</i></span>
-                    <span class="mdui-chip-title">Online Users</span>
-                    <!-- TODO: check online number num -->
-                </div>
-                <!-- TODO: add a message container -->
+                <span class="mdui-chip-title">Online Users</span>
+                <!-- TODO: check online number num -->
             </div>
-
+        </div>
+        <div class="offline">
+            <div class="mdui-chip">
+                    <span class="mdui-chip-icon mdui-color-grey">
+                        <i class="mdui-icon material-icons">face</i></span>
+                <span class="mdui-chip-title">Offline Users</span>
+                <!-- TODO: check offline number num -->
+            </div>
         </div>
     </div>
 </div>
