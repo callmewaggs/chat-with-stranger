@@ -10,7 +10,6 @@
         .container_content {
             width: 70%;
             float: left;
-
         }
 
         .container_online {
@@ -24,6 +23,16 @@
 
         .offline {
             height: 50%
+        }
+
+        .alert {
+            text-align: center;
+            background: snow;
+        }
+
+        .time {
+            text-align: right;
+            font-size: xx-small;
         }
 
     </style>
@@ -51,8 +60,8 @@
                 <div class="mdui-col-xs-12 mdui-col-sm-6">
                     <div class="mdui-col-xs-12 mdui-col-sm-10">
                         <div class="mdui-textfield-floating-label" style="margin-top:15px">
-                            <i class="mdui-icon">Welcome：</i>
-                            <i class="mdui-icon" id="username" th:text="${username}"></i>
+                            <i class="mdui-icon">User：</i>
+                            <i class="mdui-icon" id="username" th:text="${session.loginInfo}"></i>
                         </div>
                     </div>
                     <div class="mdui-col-xs-12 mdui-col-sm-10">
@@ -62,7 +71,9 @@
                             <input class="mdui-textfield-input" id="msg"/>
                         </div>
                         <div class="mdui-container" style="padding:20px 35px">
-                            <!-- TODO: add a send button to send message -->
+                            <button class="mdui-btn mdui-color-theme mdui-ripple"
+                                    onclick="sendMsgToServer()">Send
+                            </button>
                             <button class="mdui-btn mdui-color-theme mdui-ripple"
                                     onclick="clearMsg()">Clear
                             </button>
@@ -70,28 +81,21 @@
                     </div>
                 </div>
 
-                <div class="mdui-col-xs-6 mdui-col-sm-5" style="padding:10px 0">
-                    <!-- TODO: add a message container -->
+                <div class="mdui-col-xs-6 mdui-col-sm-5" id="messages" style="padding:10px 0">
+                    <div class="message-container" id="message-container">
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="container_online">
-        <div class="online">
-            <div class="mdui-chip">
+        <div class="mdui-chip">
                     <span class="mdui-chip-icon mdui-color-blue">
                         <i class="mdui-icon material-icons">face</i></span>
-                <span class="mdui-chip-title">Online Users</span>
-                <!-- TODO: check online number num -->
-            </div>
+            <span class="mdui-chip-title">Online Users(<span class="chat-num"></span>)</span>
         </div>
-        <div class="offline">
-            <div class="mdui-chip">
-                    <span class="mdui-chip-icon mdui-color-grey">
-                        <i class="mdui-icon material-icons">face</i></span>
-                <span class="mdui-chip-title">Offline Users</span>
-                <!-- TODO: check offline number num -->
-            </div>
+        <div class="online" id="online">
         </div>
     </div>
 </div>
@@ -105,9 +109,9 @@
      */
     function getWebSocket() {
         /**
-         * WebSocket client PS：URL shows WebSocket protocal, port number, and then end point.
+         * WebSocket client PS：URL shows WebSocket protocol, port number, and then end point.
          */
-        var webSocket = new WebSocket(/*[[${webSocketUrl}]]*/ 'ws://localhost:8080/chat');
+        var webSocket = new WebSocket(/*[[${webSocketUrl}]]*/ 'ws://localhost:8080/open');
         /**
          * websocket open connection.
          */
@@ -121,31 +125,67 @@
             console.log('WebSocket Receives：%c' + event.data, 'color:green');
             //Receive Message from Server
             var message = JSON.parse(event.data) || {};
+            console.log(message);
             var $messageContainer = $('.message-container');
-            if (message.type === 'SPEAK') {
-                $messageContainer.append(
-                    '<div class="mdui-card" style="margin: 10px 0;">' +
-                    '<div class="mdui-card-primary">' +
-                    '<div class="mdui-card-content message-content">' + message.username + "：" + message.msg + '</div>' +
-                    '</div></div>');
+            var $onlineContainer = $('.online');
+            if (message.TYPE === 'CHAT') {
+                appendPrimaryCard($messageContainer, message.USERNAME + "：" + message.MSG, message.TIME);
+            } else if (message.TYPE === 'ENTER') {
+                appendSubCard($messageContainer, message.USERNAME + " join here! Say hi!");
+                appendUser($onlineContainer, message.USERNAME);
+            } else if (message.TYPE === 'LEAVE') {
+                appendSubCard($messageContainer, message.USERNAME + " leave this chat room");
+                deleteUser(message.USERNAME);
             }
-            $('.chat-num').text(message.onlineCount);
+
+            $('.chat-num').text(message.ONLINECOUNT);
             var $cards = $messageContainer.children('.mdui-card:visible').toArray();
-            if ($cards.length > 5) {
+            if ($cards.length > 6) {
                 $cards.forEach(function (item, index) {
-                    index < $cards.length - 5 && $(item).slideUp('fast');
+                    index < $cards.length - 6 && $(item).slideUp('fast');
                 });
             }
         };
-        /**
-         * Close connection
-         */
+
+        function appendPrimaryCard(target, message, time) {
+            target.append(
+                '<div class="mdui-card" style="margin: 10px 0;">'
+                + '<div class="mdui-card-primary">'
+                + '<div class="mdui-card-content message-content">'
+                + message
+                + '<span class="time"> [' + time + ']</span>'
+                + '</div></div></div>');
+        }
+
+        function appendSubCard(target, message) {
+            target.append(
+                '<div class="mdui-card" style="margin: 10px 0;">'
+                + '<div class="mdui-card-primary-subtitle alert">'
+                + '<div class="mdui-card-content message-content">'
+                + message
+                + '</div></div></div>');
+        }
+
+        function appendUser(target, username) {
+            target.append(
+                '<div id=' + username + '>' +
+                '<span class="mdui-chip-icon mdui-color-blue"> <i class="mdui-icon material-icons">face</i></span>'
+                + '<span class="mdui-chip-title">' + username + '</span>'
+                + '</div>'
+            );
+        }
+
+        function deleteUser(username) {
+            var target = document.getElementById(username);
+            target.parentNode.removeChild(target);
+        }
+
+        // Close connection
         webSocket.onclose = function (event) {
             console.log('WebSocket close connection.');
         };
-        /**
-         * Exception
-         */
+
+        // Exception
         webSocket.onerror = function (event) {
             console.log('WebSocket exception.');
         };
@@ -159,8 +199,9 @@
      */
     function sendMsgToServer() {
         var $message = $('#msg');
+        var $username = $('#username');
         if ($message.val()) {
-            webSocket.send(JSON.stringify({username: $('#username').text(), msg: $message.val()}));
+            webSocket.send(JSON.stringify({USERNAME: $username.text(), MSG: $message.val(), TYPE: 'CHAT'}));
             $message.val(null);
         }
     }
@@ -169,7 +210,6 @@
     function clearMsg() {
         $(".message-container").empty();
     }
-
 
     // Enter to send message.
     document.onkeydown = function (event) {

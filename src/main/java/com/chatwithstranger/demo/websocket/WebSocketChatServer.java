@@ -1,23 +1,26 @@
 package com.chatwithstranger.demo.websocket;
 
+import com.alibaba.fastjson.JSON;
+import com.chatwithstranger.demo.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
-import javax.websocket.RemoteEndpoint.Basic;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@ServerEndpoint("/open")    // open 이라는 Url 요청을 통해 웹소켓에 들어가겠다.
+@ServerEndpoint("/open/{username}")    // open 이라는 Url 요청을 통해 웹소켓에 들어가겠다.
 public class WebSocketChatServer {
-    /**
-     * All chat sessions.
-     */
+    // All chat sessions.
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd hh:mm");
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketChatServer.class);
 
@@ -32,7 +35,6 @@ public class WebSocketChatServer {
                 session.getBasicRemote().sendText(msg);
             }
         } catch (IOException e) {
-            // TODO : handle exception.
             e.printStackTrace();
         }
     }
@@ -41,47 +43,43 @@ public class WebSocketChatServer {
     // onOpen : on open connection to establish the connection.
     // 클라이언트가 웹소켓에 들어오고 서버에 아무런 문제 없이 들어왔을 때 실행되는 메서드
     @OnOpen
-    public void onOpen(Session session) {
-        logger.info("Open session id : " + session.getId());
-        try {
-            final Basic basic = session.getBasicRemote();
-            basic.sendText("Connection Established");
-        } catch (IOException e) {
-            // TODO : handle exception.
-            e.printStackTrace();
-        }
-        onlineSessions.put(session.getId(), session);
+    public void onOpen(Session session, @PathParam("username") String username) {
+        logger.info("Open session id : " + session.getId() + ", username : " + username);
+
+        if (onlineSessions.containsKey(session.getId()))
+            return;
+
+        onlineSessions.put(username, session);
+        sendMessageToAll(Message.jsonConverter(username, "ENTER", ""
+                , sdf.format(new Date()), onlineSessions.size()));
     }
 
     // onMessage: 1) Get username and session. 2) Send message to all.
     // 클라이언트에게 메세지가 들어왔을 때 실행되는 메서드.
     @OnMessage
     public void onMessage(Session session, String jsonStr) {
-        String[] parsed = jsonStr.split(":");
-        logger.info("Message from " + parsed[0] + " : " + parsed[1]);
-        try {
-            final Basic basic = session.getBasicRemote();
-            basic.sendText("to : " + jsonStr);
-        } catch (IOException e) {
-            // TODO : handle exception.
-            e.printStackTrace();
-        }
-        sendMessageToAll(jsonStr);
+
+        Message message = JSON.parseObject(jsonStr, Message.class);
+        message.setTime(sdf.format(new Date()));
+        message.setOnlineCount(onlineSessions.size());
+        logger.info("Message from " + message.getUsername());
+        sendMessageToAll(Message.jsonConverter(message.getUsername(), message.getType(), message.getContent(), message.getTime(), message.getOnlineCount()));
     }
 
     // Close connection, 1) remove session, 2) update user.
     // 클라이언트와 웹소켓의 연결이 끊기면 실행되는 메서드.
     @OnClose
-    public void onClose(Session session) {
-        logger.info("Session " + session.getId() + " has ended");
-        onlineSessions.remove(session.getId());
+    public void onClose(Session session, @PathParam("username") String username) {
+        logger.info("Close session id : " + session.getId() + ", username : " + username);
+
+        onlineSessions.remove(username);
+        sendMessageToAll(Message.jsonConverter(username, "LEAVE", ""
+                , sdf.format(new Date()), onlineSessions.size()));
     }
 
     // Print exception.
     @OnError
     public void onError(Session session, Throwable error) {
-        logger.error("Session " + session.getId() + " has error");
         error.printStackTrace();
     }
-
 }

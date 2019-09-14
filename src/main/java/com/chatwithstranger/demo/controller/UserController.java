@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -69,7 +70,11 @@ public class UserController {
             checkUser.get().setLastLogin(sdf.format(new Date()));
             userService.updateUser(checkUser.get());
 
-            return createNewModelAndView("chat", userVO, "user");
+            ModelAndView mav = createNewModelAndView("chat", null, null);
+            mav.addObject("webSocketUrl", "ws://" + InetAddress.getLocalHost().getHostAddress()
+                    + ":" + servletRequest.getServerPort() + servletRequest.getContextPath() + "/open/" + checkUser.get().getUsername());
+
+            return mav;
         } else {
             out.println("<script>alert('incorrect username or password. try again.');</script>");
             out.flush();
