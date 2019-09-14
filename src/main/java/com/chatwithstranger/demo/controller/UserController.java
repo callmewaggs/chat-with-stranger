@@ -22,7 +22,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd hh:mm");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
 
     public UserController(UserService userService) {
         this.userService = userService;

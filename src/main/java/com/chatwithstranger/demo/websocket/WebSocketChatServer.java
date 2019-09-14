@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketChatServer {
     // All chat sessions.
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd hh:mm");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
 
     private static final Logger logger = LoggerFactory.getLogger(WebSocketChatServer.class);
 
@@ -50,8 +50,9 @@ public class WebSocketChatServer {
             return;
 
         onlineSessions.put(username, session);
+        String onlineUsers = onlineSessions.keySet().toString();
         sendMessageToAll(Message.jsonConverter(username, "ENTER", ""
-                , sdf.format(new Date()), onlineSessions.size()));
+                , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
     }
 
     // onMessage: 1) Get username and session. 2) Send message to all.
@@ -61,9 +62,11 @@ public class WebSocketChatServer {
 
         Message message = JSON.parseObject(jsonStr, Message.class);
         message.setTime(sdf.format(new Date()));
+        message.setOnlineUsers(onlineSessions.keySet().toString());
         message.setOnlineCount(onlineSessions.size());
         logger.info("Message from " + message.getUsername());
-        sendMessageToAll(Message.jsonConverter(message.getUsername(), message.getType(), message.getContent(), message.getTime(), message.getOnlineCount()));
+        sendMessageToAll(Message.jsonConverter(message.getUsername(), message.getType(), message.getContent()
+                , message.getTime(), message.getOnlineCount(), message.getOnlineUsers()));
     }
 
     // Close connection, 1) remove session, 2) update user.
@@ -74,7 +77,7 @@ public class WebSocketChatServer {
 
         onlineSessions.remove(username);
         sendMessageToAll(Message.jsonConverter(username, "LEAVE", ""
-                , sdf.format(new Date()), onlineSessions.size()));
+                , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
     }
 
     // Print exception.

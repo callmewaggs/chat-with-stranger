@@ -51,9 +51,9 @@
 <div style="margin-left:20px;margin-right:20px">
     <div class="container_content">
         <div class="mdui-chip">
-                    <span class="mdui-chip-icon mdui-color-blue">
-                        <i class="mdui-icon material-icons">&#xe420;</i></span>
-            <span class="mdui-chip-title">Content</span>
+                    <span class="mdui-chip-icon mdui-color-grey">
+                        <i class="mdui-icon material-icons">apps</i></span>
+            <span class="mdui-chip-title">Setting</span>
         </div>
         <div class="container_text">
             <div class="mdui-row">
@@ -91,10 +91,11 @@
     </div>
     <div class="container_online">
         <div class="mdui-chip">
-                    <span class="mdui-chip-icon mdui-color-blue">
-                        <i class="mdui-icon material-icons">face</i></span>
-            <span class="mdui-chip-title">Online Users(<span class="chat-num"></span>)</span>
+                    <span class="mdui-chip-icon mdui-color-grey">
+                        <i class="mdui-icon material-icons">accessibility</i></span>
+            <span class="mdui-chip-title">Online Users (<span class="chat-num"></span>)</span>
         </div>
+        <br>
         <div class="online" id="online">
         </div>
     </div>
@@ -132,7 +133,7 @@
                 appendPrimaryCard($messageContainer, message.USERNAME + "：" + message.MSG, message.TIME);
             } else if (message.TYPE === 'ENTER') {
                 appendSubCard($messageContainer, message.USERNAME + " join here! Say hi!");
-                appendUser($onlineContainer, message.USERNAME);
+                appendUsers($onlineContainer, message.ONLINEUSERS);
             } else if (message.TYPE === 'LEAVE') {
                 appendSubCard($messageContainer, message.USERNAME + " leave this chat room");
                 deleteUser(message.USERNAME);
@@ -166,13 +167,19 @@
                 + '</div></div></div>');
         }
 
-        function appendUser(target, username) {
-            target.append(
-                '<div id=' + username + '>' +
-                '<span class="mdui-chip-icon mdui-color-blue"> <i class="mdui-icon material-icons">face</i></span>'
-                + '<span class="mdui-chip-title">' + username + '</span>'
-                + '</div>'
-            );
+        function appendUsers(target, onlineUsers) {
+            var users = onlineUsers.substring(1, onlineUsers.length - 1).split(', ');
+
+            users.forEach(function (username) {
+                if (document.getElementById(username) == null) {
+                    target.append(
+                        '<div id=' + username + '>' +
+                        '<span class="mdui-chip-icon mdui-color-blue"> <i class="mdui-icon material-icons">face</i></span>'
+                        + '<span class="mdui-chip-title">' + username + '</span>'
+                        + '</div>'
+                    );
+                }
+            });
         }
 
         function deleteUser(username) {
