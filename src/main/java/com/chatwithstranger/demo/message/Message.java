@@ -5,9 +5,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 // WebSocket message model
 @Getter
@@ -20,6 +18,10 @@ public class Message {
 
     @Id
     @Column(nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     @JSONField(name = "USERNAME")
     private String username;
 
@@ -27,7 +29,7 @@ public class Message {
     @JSONField(name = "TYPE")
     private String type;
 
-    @Column(nullable = false)
+    @Column
     @JSONField(name = "MSG")
     private String content;
 

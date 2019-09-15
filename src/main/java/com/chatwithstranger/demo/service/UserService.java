@@ -5,7 +5,7 @@ import com.chatwithstranger.demo.user.User;
 import java.util.Optional;
 
 public interface UserService {
-    void signupUser(User user);
+    void saveUser(User user);
 
     void updateUser(User user);
 

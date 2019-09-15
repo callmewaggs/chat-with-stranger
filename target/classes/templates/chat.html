@@ -135,7 +135,7 @@
                 appendSubCard($messageContainer, message.USERNAME + " join here! Say hi!");
                 appendUsers($onlineContainer, message.ONLINEUSERS);
             } else if (message.TYPE === 'LEAVE') {
-                appendSubCard($messageContainer, message.USERNAME + " leave this chat room");
+                appendSubCard($messageContainer, message.USERNAME + " leave this chat room.");
                 deleteUser(message.USERNAME);
             }
 

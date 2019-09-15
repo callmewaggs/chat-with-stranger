@@ -47,13 +47,16 @@ public class UserController {
             return createNewModelAndView("signup", null, null);
         } else {
             User user = User.createWithAllArgs(userVO.getUsername(), userVO.getPassword(), sdf.format(new Date()));
-            userService.signupUser(user);
+            userService.saveUser(user);
             out.println("<script>alert('welcome!!');</script>");
             out.flush();
             return createNewModelAndView("index", userVO, "user");
         }
     }
 
+    /*
+     * TODO : 분리 필요!!!!!!!!!!!!!!! 성공시 chat으로 redirect 시켜서. 여기서는 id/pw 확인해서 세션을 생성, 실패시 세션 전체 삭제. 여기서 동시접속 막을 수 있음. 이미 접속시 제한 걸어서.
+     */
     @PostMapping("/signin")
     public ModelAndView signinAndDisplayChatView(@ModelAttribute("user") UserVO userVO
             , HttpServletRequest servletRequest, HttpServletResponse response) throws IOException {
