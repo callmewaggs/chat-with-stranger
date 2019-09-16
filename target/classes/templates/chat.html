@@ -60,7 +60,7 @@
                 <div class="mdui-col-xs-12 mdui-col-sm-6">
                     <div class="mdui-col-xs-12 mdui-col-sm-10">
                         <div class="mdui-textfield-floating-label" style="margin-top:15px">
-                            <i class="mdui-icon">User：</i>
+                            <i class="mdui-icon">User : </i>
                             <i class="mdui-icon" id="username" th:text="${session.loginInfo}"></i>
                         </div>
                     </div>
@@ -123,14 +123,14 @@
          * Server send 1) broadcast message, 2) online users.
          */
         webSocket.onmessage = function (event) {
-            console.log('WebSocket Receives：%c' + event.data, 'color:green');
+            console.log('WebSocket Receives -> %c' + event.data, 'color:green');
             //Receive Message from Server
             var message = JSON.parse(event.data) || {};
             console.log(message);
             var $messageContainer = $('.message-container');
             var $onlineContainer = $('.online');
             if (message.TYPE === 'CHAT') {
-                appendPrimaryCard($messageContainer, message.USERNAME + "：" + message.MSG, message.TIME);
+                appendPrimaryCard($messageContainer, message.USERNAME + " : " + message.MSG, message.TIME);
             } else if (message.TYPE === 'ENTER') {
                 appendSubCard($messageContainer, message.USERNAME + " join here! Say hi!");
                 appendUsers($onlineContainer, message.ONLINEUSERS);

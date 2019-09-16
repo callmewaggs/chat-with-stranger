@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -54,33 +53,29 @@ public class UserController {
         }
     }
 
-    /*
-     * TODO : 분리 필요!!!!!!!!!!!!!!! 성공시 chat으로 redirect 시켜서. 여기서는 id/pw 확인해서 세션을 생성, 실패시 세션 전체 삭제. 여기서 동시접속 막을 수 있음. 이미 접속시 제한 걸어서.
-     */
     @PostMapping("/signin")
-    public ModelAndView signinAndDisplayChatView(@ModelAttribute("user") UserVO userVO
-            , HttpServletRequest servletRequest, HttpServletResponse response) throws IOException {
+    public ModelAndView verifyUserAndRedirect(@ModelAttribute("user") UserVO userVO
+            , HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         Optional<User> checkUser = userService.findUserByUsernameAndPassword(userVO.getUsername(), userVO.getPassword());
         response.setContentType("text/html; charset=UTF-8");
         PrintWriter out = response.getWriter();
 
         if (checkUser.isPresent()) {
-            servletRequest.getSession().setAttribute("loginInfo", checkUser.get().getUsername());
+            request.getSession().setAttribute("loginInfo", checkUser.get().getUsername());
 
             out.println("<script>alert('Last Login : " + checkUser.get().getLastLogin() + "');</script>");
-            out.flush();
 
             checkUser.get().setLastLogin(sdf.format(new Date()));
             userService.updateUser(checkUser.get());
 
-            ModelAndView mav = createNewModelAndView("chat", null, null);
-            mav.addObject("webSocketUrl", "ws://" + InetAddress.getLocalHost().getHostAddress()
-                    + ":" + servletRequest.getServerPort() + servletRequest.getContextPath() + "/open/" + checkUser.get().getUsername());
-
-            return mav;
+            return createNewModelAndView("redirect:/chat", null, null);
         } else {
+            request.getSession().invalidate();
+            request.getSession().removeAttribute("loginId");
+
             out.println("<script>alert('incorrect username or password. try again.');</script>");
-            out.flush();
+
             return createNewModelAndView("index", userVO, "user");
         }
     }
