@@ -80,14 +80,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/logout")
-    public ModelAndView logoutAndDisplayIndexView(HttpServletRequest servletRequest) {
-        servletRequest.getSession().invalidate();
-        servletRequest.getSession().removeAttribute("loginInfo");
-
-        return createNewModelAndView("index", User.createInitialUser(), "user");
-    }
-
     private ModelAndView createNewModelAndView(String viewName, Object attributeValue, String attributeName) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName(viewName);

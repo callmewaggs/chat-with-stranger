@@ -1,6 +1,7 @@
 package com.chatwithstranger.demo.controller;
 
 import com.chatwithstranger.demo.controller.vo.UserVO;
+import com.chatwithstranger.demo.user.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,6 +36,15 @@ public class ChatController {
             return mav;
         }
     }
+
+    @GetMapping("/logout")
+    public ModelAndView logoutAndDisplayIndexView(HttpServletRequest servletRequest) {
+        servletRequest.getSession().invalidate();
+        servletRequest.getSession().removeAttribute("loginInfo");
+
+        return createNewModelAndView("index", User.createInitialUser(), "user");
+    }
+
 
     private ModelAndView createNewModelAndView(String viewName, Object attributeValue, String attributeName) {
         ModelAndView mav = new ModelAndView();

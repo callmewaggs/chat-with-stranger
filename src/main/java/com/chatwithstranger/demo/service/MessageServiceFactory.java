@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MessageServiceFactory {
+
     private static MessageService messageService;
 
     private MessageServiceFactory(MessageService messageService) {

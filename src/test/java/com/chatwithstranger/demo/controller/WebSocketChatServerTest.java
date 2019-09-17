@@ -1,0 +1,105 @@
+package com.chatwithstranger.demo.controller;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.chatwithstranger.demo.service.UserService;
+import com.chatwithstranger.demo.websocket.WebSocketChatServer;
+import org.junit.*;
+import org.junit.runner.*;
+import org.mockito.ArgumentCaptor;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.websocket.RemoteEndpoint.Basic;
+import javax.websocket.Session;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+@RunWith(SpringRunner.class)
+@WebMvcTest
+public class WebSocketChatServerTest {
+
+    private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
+    @MockBean
+    private UserService userService;
+    private Basic endpoint;
+    private Session session;
+    private WebSocketChatServer server;
+    private ArgumentCaptor<String> captor;
+    private String username;
+
+    @Before
+    public void setUp() {
+        username = "test";
+        server = new WebSocketChatServer();
+        captor = ArgumentCaptor.forClass(String.class);
+        endpoint = mock(Basic.class);
+        session = createSession(username, endpoint);
+    }
+
+    private Session createSession(String id, Basic endpoint) {
+        Session session = mock(Session.class);
+        when(session.getId()).thenReturn(id);
+        when(session.getBasicRemote()).thenReturn(endpoint);
+        onlineSessions.put(username, session);
+        return session;
+    }
+
+    @After
+    public void tearDown() {
+        onlineSessions.keySet().forEach(key -> server.onClose(onlineSessions.get(key), key));
+    }
+
+    @Test
+    public void sendENTERMessageOnOpenTest() throws IOException {
+        // Act
+        server.onOpen(session, username);
+
+        // Assert
+        verify(endpoint).sendText(captor.capture());
+        assertEquals("ENTER", sentObject().getString("TYPE"));
+        assertEquals(1, sentObject().getIntValue("ONLINECOUNT"));
+    }
+
+
+    @Test
+    public void sendCHATMessageOnMessageTest() throws IOException {
+        Map<String, String> message = new HashMap<>();
+        message.put("USERNAME", "test");
+        message.put("MSG", "testing a message");
+        message.put("TYPE", "CHAT");
+
+        server.onOpen(session, username);
+        server.onMessage(session, JSON.toJSONString(message));
+
+        verify(endpoint, times(2)).sendText(captor.capture());
+        assertEquals("CHAT", sentObject().getString("TYPE"));
+        assertEquals("test", sentObject().getString("USERNAME"));
+        assertEquals("testing a message", sentObject().getString("MSG"));
+        assertEquals(1, sentObject().getIntValue("ONLINECOUNT"));
+    }
+
+    @Test
+    public void sendLEAVEMessageOnClose() throws IOException {
+        Session anotherSession = createSession("test2", mock(Basic.class));
+
+        server.onOpen(session, username);
+        server.onOpen(anotherSession, "test2");
+        server.onClose(anotherSession, "test2");
+
+        verify(endpoint, times(3)).sendText(captor.capture());
+        assertEquals("LEAVE", sentObject().getString("TYPE"));
+        assertEquals(1, sentObject().getIntValue("ONLINECOUNT"));
+    }
+
+
+    private JSONObject sentObject() {
+        return JSON.parseObject(captor.getValue());
+    }
+}
