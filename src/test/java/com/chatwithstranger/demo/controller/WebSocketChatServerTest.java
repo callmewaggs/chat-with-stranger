@@ -2,14 +2,11 @@ package com.chatwithstranger.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.chatwithstranger.demo.service.UserService;
+import com.chatwithstranger.demo.service.MessageService;
+import com.chatwithstranger.demo.service.MessageServiceFactory;
 import com.chatwithstranger.demo.websocket.WebSocketChatServer;
 import org.junit.*;
-import org.junit.runner.*;
 import org.mockito.ArgumentCaptor;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
@@ -21,13 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest
 public class WebSocketChatServerTest {
 
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
-    @MockBean
-    private UserService userService;
+
     private Basic endpoint;
     private Session session;
     private WebSocketChatServer server;
@@ -36,6 +30,7 @@ public class WebSocketChatServerTest {
 
     @Before
     public void setUp() {
+        MessageServiceFactory.init(mock(MessageService.class));
         username = "test";
         server = new WebSocketChatServer();
         captor = ArgumentCaptor.forClass(String.class);

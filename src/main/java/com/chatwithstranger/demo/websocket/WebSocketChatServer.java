@@ -2,6 +2,7 @@ package com.chatwithstranger.demo.websocket;
 
 import com.alibaba.fastjson.JSON;
 import com.chatwithstranger.demo.message.Message;
+import com.chatwithstranger.demo.service.MessageServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -47,8 +48,8 @@ public class WebSocketChatServer {
 
         onlineSessions.put(username, session);
         String onlineUsers = onlineSessions.keySet().toString();
-//        MessageServiceFactory.create().saveMessage(Message.createWithAllArgs(username, "ENTER", ""
-//                , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
+        MessageServiceFactory.getInstance().saveMessage(Message.createWithAllArgs(username, "ENTER", ""
+                , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
         sendMessageToAll(Message.jsonConverter(username, "ENTER", ""
                 , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
     }
@@ -62,7 +63,7 @@ public class WebSocketChatServer {
         message.setTime(sdf.format(new Date()));
         message.setOnlineUsers(onlineSessions.keySet().toString());
         message.setOnlineCount(onlineSessions.size());
-//        MessageServiceFactory.create().saveMessage(message);
+        MessageServiceFactory.getInstance().saveMessage(message);
         logger.info("Message from " + message.getUsername());
         sendMessageToAll(Message.jsonConverter(message.getUsername(), message.getType(), message.getContent()
                 , message.getTime(), message.getOnlineCount(), message.getOnlineUsers()));
@@ -75,8 +76,8 @@ public class WebSocketChatServer {
         logger.info("Close session id : " + session.getId() + ", username : " + username);
 
         onlineSessions.remove(username);
-//        MessageServiceFactory.create().saveMessage(Message.createWithAllArgs(username, "LEAVE", ""
-//                , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
+        MessageServiceFactory.getInstance().saveMessage(Message.createWithAllArgs(username, "LEAVE", ""
+                , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
         sendMessageToAll(Message.jsonConverter(username, "LEAVE", ""
                 , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
     }
