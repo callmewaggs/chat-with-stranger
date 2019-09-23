@@ -1,4 +1,4 @@
-package com.chatwithstranger.demo;
+package com.chatwithstranger.demo.websocket.config;
 
 import com.chatwithstranger.demo.service.MessageService;
 import com.chatwithstranger.demo.service.MessageServiceFactory;

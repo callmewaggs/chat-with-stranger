@@ -18,12 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @ServerEndpoint("/open/{username}")    // open 이라는 Url 요청을 통해 웹소켓에 들어가겠다.
-public class WebSocketChatServer {
+public class OpenChatWebSocketChatServer {
     // All chat sessions.
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
     private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketChatServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenChatWebSocketChatServer.class);
 
     // send message method.
     private static void sendMessageToAll(String msg) {

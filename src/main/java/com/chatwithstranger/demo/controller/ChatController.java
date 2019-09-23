@@ -13,10 +13,21 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Controller
 public class ChatController {
-    @GetMapping("/chat")
+
+    @GetMapping("/random")
+    public ModelAndView displayRandomView(HttpServletRequest request) throws UnknownHostException {
+        HttpSession session = request.getSession(true);
+        ModelAndView mav = createNewModelAndView("random", null, null);
+        mav.addObject("webSocketUrl", "ws://" + InetAddress.getLocalHost().getHostAddress()
+                + ":" + request.getServerPort() + request.getContextPath() + "/random/" + session.getId());
+        return mav;
+    }
+
+    @GetMapping("/open")
     public ModelAndView displayChatView(@ModelAttribute("user") UserVO userVO
             , HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);

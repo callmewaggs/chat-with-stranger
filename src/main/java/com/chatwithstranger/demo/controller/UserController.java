@@ -69,7 +69,7 @@ public class UserController {
             checkUser.get().setLastLogin(sdf.format(new Date()));
             userService.updateUser(checkUser.get());
 
-            return createNewModelAndView("redirect:/chat", null, null);
+            return createNewModelAndView("redirect:/open", null, null);
         } else {
             request.getSession().invalidate();
             request.getSession().removeAttribute("loginId");

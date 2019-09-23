@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.chatwithstranger.demo.service.MessageService;
 import com.chatwithstranger.demo.service.MessageServiceFactory;
-import com.chatwithstranger.demo.websocket.WebSocketChatServer;
+import com.chatwithstranger.demo.websocket.OpenChatWebSocketChatServer;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
 
@@ -18,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class WebSocketChatServerTest {
+public class OpenChatWebSocketChatServerTest {
 
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
 
     private Basic endpoint;
     private Session session;
-    private WebSocketChatServer server;
+    private OpenChatWebSocketChatServer server;
     private ArgumentCaptor<String> captor;
     private String username;
 
@@ -32,7 +32,7 @@ public class WebSocketChatServerTest {
     public void setUp() {
         MessageServiceFactory.init(mock(MessageService.class));
         username = "test";
-        server = new WebSocketChatServer();
+        server = new OpenChatWebSocketChatServer();
         captor = ArgumentCaptor.forClass(String.class);
         endpoint = mock(Basic.class);
         session = createSession(username, endpoint);
