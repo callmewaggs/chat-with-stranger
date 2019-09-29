@@ -1,7 +1,10 @@
 package com.chatwithstranger.demo.websocket;
 
 import com.alibaba.fastjson.JSON;
+import com.chatwithstranger.demo.message.EnterMessage;
+import com.chatwithstranger.demo.message.LeaveMessage;
 import com.chatwithstranger.demo.message.Message;
+import com.chatwithstranger.demo.message.NoticeMessage;
 import com.chatwithstranger.demo.service.MessageServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +29,12 @@ public class OpenChatWebSocketChatServer {
     private static final Logger logger = LoggerFactory.getLogger(OpenChatWebSocketChatServer.class);
 
     // send message method.
-    private static void sendMessageToAll(String msg) {
+    private static void sendMessageToAll(Message message) {
+
         try {
+            String parsed = JSON.toJSONString(message);
             for (Session session : onlineSessions.values()) {
-                session.getBasicRemote().sendText(msg);
+                session.getBasicRemote().sendText(parsed);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,25 +53,37 @@ public class OpenChatWebSocketChatServer {
 
         onlineSessions.put(username, session);
         String onlineUsers = onlineSessions.keySet().toString();
-        MessageServiceFactory.getInstance().saveMessage(Message.createWithAllArgs(username, "ENTER", ""
-                , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
-        sendMessageToAll(Message.jsonConverter(username, "ENTER", ""
-                , sdf.format(new Date()), onlineSessions.size(), onlineUsers));
+        Message message = new EnterMessage(
+                username,
+                sdf.format(new Date()),
+                onlineSessions.size(),
+                onlineUsers
+        );
+
+        saveAndSendMessage(message);
     }
 
     // onMessage: 1) Get username and session. 2) Send message to all.
     // 클라이언트에게 메세지가 들어왔을 때 실행되는 메서드.
     @OnMessage
     public void onMessage(Session session, String jsonStr) {
-
         Message message = JSON.parseObject(jsonStr, Message.class);
         message.setTime(sdf.format(new Date()));
         message.setOnlineUsers(onlineSessions.keySet().toString());
         message.setOnlineCount(onlineSessions.size());
-        MessageServiceFactory.getInstance().saveMessage(message);
+
+        if (message.getContent().startsWith("@공지 ")) {
+            message = new NoticeMessage(
+                    message.getUsername(),
+                    message.getContent().replace("@공지 ", ""),
+                    message.getTime(),
+                    message.getOnlineCount(),
+                    message.getOnlineUsers()
+            );
+        }
+
         logger.info("Message from " + message.getUsername());
-        sendMessageToAll(Message.jsonConverter(message.getUsername(), message.getType(), message.getContent()
-                , message.getTime(), message.getOnlineCount(), message.getOnlineUsers()));
+        saveAndSendMessage(message);
     }
 
     // Close connection, 1) remove session, 2) update user.
@@ -76,15 +93,23 @@ public class OpenChatWebSocketChatServer {
         logger.info("Close session id : " + session.getId() + ", username : " + username);
 
         onlineSessions.remove(username);
-        MessageServiceFactory.getInstance().saveMessage(Message.createWithAllArgs(username, "LEAVE", ""
-                , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
-        sendMessageToAll(Message.jsonConverter(username, "LEAVE", ""
-                , sdf.format(new Date()), onlineSessions.size(), onlineSessions.keySet().toString()));
+        Message message = new LeaveMessage(
+                username,
+                sdf.format(new Date()),
+                onlineSessions.size(),
+                onlineSessions.keySet().toString());
+
+        saveAndSendMessage(message);
     }
 
     // Print exception.
     @OnError
     public void onError(Session session, Throwable error) {
         error.printStackTrace();
+    }
+
+    private void saveAndSendMessage(Message message) {
+        MessageServiceFactory.getInstance().saveMessage(message);
+        sendMessageToAll(message);
     }
 }

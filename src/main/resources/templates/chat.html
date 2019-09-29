@@ -137,6 +137,8 @@
             } else if (message.TYPE === 'LEAVE') {
                 appendSubCard($messageContainer, message.USERNAME + " leave this chat room.");
                 deleteUser(message.USERNAME);
+            } else if (message.TYPE === 'NOTICE') {
+                appendNoticeCard($messageContainer, message.USERNAME + " : " + message.MSG, message.TIME);
             }
 
             $('.chat-num').text(message.ONLINECOUNT);
@@ -151,6 +153,16 @@
         function appendPrimaryCard(target, message, time) {
             target.append(
                 '<div class="mdui-card" style="margin: 10px 0;">'
+                + '<div class="mdui-card-primary">'
+                + '<div class="mdui-card-content message-content">'
+                + message
+                + '<span class="time"> [' + time + ']</span>'
+                + '</div></div></div>');
+        }
+
+        function appendNoticeCard(target, message, time) {
+            target.append(
+                '<div class="mdui-card" style="margin: 10px 0; background-color: #FF028D">'
                 + '<div class="mdui-card-primary">'
                 + '<div class="mdui-card-content message-content">'
                 + message

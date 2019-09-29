@@ -1,6 +1,5 @@
 package com.chatwithstranger.demo.message;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,10 +11,6 @@ import javax.persistence.*;
 @Setter
 @Entity
 public class Message {
-    public static final String ENTER = "ENTER";
-    public static final String SPEAK = "CHAT";
-    public static final String QUIT = "LEAVE";
-
     @Id
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,10 +40,11 @@ public class Message {
     @JSONField(name = "ONLINEUSERS")
     private String onlineUsers;
 
-    private Message() {
+    protected Message() {
     }
 
-    private Message(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
+    // TODO : 하드코딩 된 type 을 상수 static 클래스로 빼서. Notice message 뷰에 반영 필요
+    protected Message(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
         this.username = username;
         this.type = type;
         this.content = content;
@@ -57,11 +53,4 @@ public class Message {
         this.onlineUsers = onlineUsers;
     }
 
-    public static String jsonConverter(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
-        return JSON.toJSONString(new Message(username, type, content, time, onlineCount, onlineUsers));
-    }
-
-    public static Message createWithAllArgs(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
-        return new Message(username, type, content, time, onlineCount, onlineUsers);
-    }
 }
