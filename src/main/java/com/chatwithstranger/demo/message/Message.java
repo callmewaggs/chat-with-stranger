@@ -43,7 +43,8 @@ public class Message {
     protected Message() {
     }
 
-    // TODO : 하드코딩 된 type 을 상수 static 클래스로 빼서. Notice message 뷰에 반영 필요
+    // TODO : 하드코딩 된 type 을 상수 static 클래스로 빼서.
+    // TODO : 이미지 업로드 - 파일 업로드!!!!!
     protected Message(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
         this.username = username;
         this.type = type;
