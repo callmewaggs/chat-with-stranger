@@ -7,6 +7,25 @@
     <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
     <script th:src="@{/webjars/mdui/dist/js/mdui.js}"></script>
     <style>
+        img {
+            position: relative;
+        }
+
+        /* style this to fit your needs */
+        /* and remove [alt] to apply to all images*/
+        img:after {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            line-height: 2;
+            text-align: center;
+            content: attr(alt);
+        }
+
         .container_content {
             width: 70%;
             float: left;
@@ -65,6 +84,7 @@
                         </div>
                     </div>
                     <div class="mdui-col-xs-12 mdui-col-sm-10">
+
                         <div class="mdui-textfield mdui-textfield-floating-label">
                             <i class="mdui-icon material-icons">textsms</i>
                             <label class="mdui-textfield-label">Send Text</label>
@@ -72,12 +92,28 @@
                         </div>
                         <div class="mdui-container" style="padding:20px 35px">
                             <button class="mdui-btn mdui-color-theme mdui-ripple"
-                                    onclick="sendMsgToServer()">Send
+                                    onclick="sendToServer()">Send
                             </button>
+
+                            <input id="imgInput" name="imgInput" style="display:none" type='file'/>
+                            <button class="mdui-btn mdui-color-theme mdui-ripple"
+                                    onclick="fileSelect()">File Upload
+                            </button>
+
                             <button class="mdui-btn mdui-color-theme mdui-ripple"
                                     onclick="clearMsg()">Clear
                             </button>
                         </div>
+
+                        <form action="/upload" enctype="multipart/form-data" method="POST">
+                            <input id="sender" name="sender" th:value="${session.loginInfo}" type="hidden"/>
+                            <input id="file" name="file" onclick="fileSelect()" type="file"><br/>
+                            <div id="image_section" style="text-align: right;">
+                            </div>
+
+                            <input type="submit" value="File Upload">
+                        </form>
+
                     </div>
                 </div>
 
@@ -139,6 +175,8 @@
                 deleteUser(message.USERNAME);
             } else if (message.TYPE === 'NOTICE') {
                 appendNoticeCard($messageContainer, message.USERNAME + " : " + message.MSG, message.TIME);
+            } else if (message.TYPE === 'RESOURCE') {
+                appendImage($messageContainer, message.MSG)
             }
 
             $('.chat-num').text(message.ONLINECOUNT);
@@ -179,6 +217,15 @@
                 + '</div></div></div>');
         }
 
+        function appendImage(target, resource) {
+            target.append(
+                '<div class="mdui-card" style="margin: 10px 0;">'
+                + '<div class="mdui-card-primary-subtitle alert">'
+                + '<div class="mdui-card-content message-content">'
+                + '<img src="' + resource + '"/>'
+                + '</div></div></div>');
+        }
+
         function appendUsers(target, onlineUsers) {
             var users = onlineUsers.substring(1, onlineUsers.length - 1).split(', ');
 
@@ -214,9 +261,9 @@
     var webSocket = getWebSocket();
 
     /**
-     * Send messages to server use webSocket.
+     * Send messages to server using webSocket.
      */
-    function sendMsgToServer() {
+    function sendToServer() {
         var $message = $('#msg');
         var $username = $('#username');
         if ($message.val()) {
@@ -224,6 +271,42 @@
             $message.val(null);
         }
     }
+
+    function fileSelect() {
+        var parent = document.getElementById("image_section");
+
+        var toBeRemoved = document.getElementById("imgFile");
+
+        while (toBeRemoved !== null) {
+            parent.removeChild(toBeRemoved);
+            toBeRemoved = document.getElementById("imgFile");
+        }
+
+        var file = document.createElement("img");
+        file.setAttribute("id", "imgFile");
+        file.setAttribute("name", "imgFile");
+        file.setAttribute("src", "#");
+        file.setAttribute("style", "width: 400px; height: auto; vertical-align: middle;");
+
+        parent.appendChild(file);
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#imgFile').attr('src', e.target.result);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    $("#file").change(function () {
+        readURL(this);
+    });
+
 
     // Clear screen
     function clearMsg() {
@@ -233,7 +316,7 @@
     // Enter to send message.
     document.onkeydown = function (event) {
         var e = event || window.event || arguments.callee.caller.arguments[0];
-        e.keyCode === 13 && sendMsgToServer();
+        e.keyCode === 13 && sendToServer();
     };
 </script>
 

@@ -29,7 +29,7 @@ public class OpenChatWebSocketChatServer {
     private static final Logger logger = LoggerFactory.getLogger(OpenChatWebSocketChatServer.class);
 
     // send message method.
-    private static void sendMessageToAll(Message message) {
+    public static void sendMessageToAll(Message message) {
 
         try {
             String parsed = JSON.toJSONString(message);
