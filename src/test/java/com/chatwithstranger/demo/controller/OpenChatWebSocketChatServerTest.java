@@ -62,7 +62,6 @@ public class OpenChatWebSocketChatServerTest {
         assertEquals(1, sentObject().getIntValue("ONLINECOUNT"));
     }
 
-
     @Test
     public void sendCHATMessageOnMessageTest() throws IOException {
         Map<String, String> message = new HashMap<>();
@@ -92,7 +91,6 @@ public class OpenChatWebSocketChatServerTest {
         assertEquals("LEAVE", sentObject().getString("TYPE"));
         assertEquals(1, sentObject().getIntValue("ONLINECOUNT"));
     }
-
 
     private JSONObject sentObject() {
         return JSON.parseObject(captor.getValue());

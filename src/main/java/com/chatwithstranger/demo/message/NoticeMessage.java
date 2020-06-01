@@ -4,10 +4,11 @@ import javax.persistence.Entity;
 
 @Entity
 public class NoticeMessage extends Message {
-    private NoticeMessage() {
-    }
+  private NoticeMessage() {
+  }
 
-    public NoticeMessage(String username, String content, String time, int onlineCount, String onlineUsers) {
-        super(username, "NOTICE", content, time, onlineCount, onlineUsers);
-    }
+  public NoticeMessage(
+          String username, String content, String time, int onlineCount, String onlineUsers) {
+    super(username, "NOTICE", content, time, onlineCount, onlineUsers);
+  }
 }

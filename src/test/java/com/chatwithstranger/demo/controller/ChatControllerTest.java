@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @RunWith(SpringRunner.class)
 @WebMvcTest
 public class ChatControllerTest {
@@ -41,7 +40,6 @@ public class ChatControllerTest {
         assertEquals("signup", actualMAV.getViewName());
     }
 
-
     @Test
     public void afterLeaveViewTest() throws Exception {
         // Arrange
@@ -55,6 +53,4 @@ public class ChatControllerTest {
         actual.andExpect(status().isOk());
         assertEquals("index", actualMAV.getViewName());
     }
-
-
 }

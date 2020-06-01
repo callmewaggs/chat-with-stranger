@@ -45,7 +45,13 @@ public class Message {
 
     // TODO : 하드코딩 된 type 을 상수 static 클래스로 빼서.
     // TODO : 이미지 업로드 - 파일 업로드!!!!!
-    protected Message(String username, String type, String content, String time, int onlineCount, String onlineUsers) {
+    protected Message(
+            String username,
+            String type,
+            String content,
+            String time,
+            int onlineCount,
+            String onlineUsers) {
         this.username = username;
         this.type = type;
         this.content = content;
@@ -53,5 +59,4 @@ public class Message {
         this.onlineCount = onlineCount;
         this.onlineUsers = onlineUsers;
     }
-
 }

@@ -7,11 +7,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class IndexController {
-    @GetMapping("/")
-    public ModelAndView displayIndexPage() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("index");
-        mav.addObject("user", new UserVO(null, null));
-        return mav;
-    }
+  @GetMapping("/")
+  public ModelAndView displayIndexPage() {
+    ModelAndView mav = new ModelAndView();
+    mav.setViewName("index");
+    mav.addObject("user", new UserVO(null, null));
+    return mav;
+  }
 }

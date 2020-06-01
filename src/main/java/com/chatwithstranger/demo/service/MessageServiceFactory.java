@@ -9,8 +9,8 @@ public class MessageServiceFactory {
     }
 
     public static void init(MessageService messageService) {
-//        if (MessageServiceFactory.messageService != null)
-//            throw new IllegalStateException("Not Allow Duplicated Instance");
+        //        if (MessageServiceFactory.messageService != null)
+        //            throw new IllegalStateException("Not Allow Duplicated Instance");
 
         MessageServiceFactory.messageService = messageService;
     }

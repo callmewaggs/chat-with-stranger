@@ -20,13 +20,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@ServerEndpoint("/open/{username}")    // open 이라는 Url 요청을 통해 웹소켓에 들어가겠다.
+@ServerEndpoint("/open/{username}") // open 이라는 Url 요청을 통해 웹소켓에 들어가겠다.
 public class OpenChatWebSocketChatServer {
+    private static final Logger logger = LoggerFactory.getLogger(OpenChatWebSocketChatServer.class);
     // All chat sessions.
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
     private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
-
-    private static final Logger logger = LoggerFactory.getLogger(OpenChatWebSocketChatServer.class);
 
     // send message method.
     public static void sendMessageToAll(Message message) {
@@ -48,17 +47,12 @@ public class OpenChatWebSocketChatServer {
     public void onOpen(Session session, @PathParam("username") String username) {
         logger.info("Open session id : " + session.getId() + ", username : " + username);
 
-        if (onlineSessions.containsKey(session.getId()))
-            return;
+        if (onlineSessions.containsKey(session.getId())) return;
 
         onlineSessions.put(username, session);
         String onlineUsers = onlineSessions.keySet().toString();
-        Message message = new EnterMessage(
-                username,
-                sdf.format(new Date()),
-                onlineSessions.size(),
-                onlineUsers
-        );
+        Message message =
+                new EnterMessage(username, sdf.format(new Date()), onlineSessions.size(), onlineUsers);
 
         saveAndSendMessage(message);
     }
@@ -73,13 +67,13 @@ public class OpenChatWebSocketChatServer {
         message.setOnlineCount(onlineSessions.size());
 
         if (message.getContent().startsWith("@공지 ")) {
-            message = new NoticeMessage(
-                    message.getUsername(),
-                    message.getContent().replace("@공지 ", ""),
-                    message.getTime(),
-                    message.getOnlineCount(),
-                    message.getOnlineUsers()
-            );
+            message =
+                    new NoticeMessage(
+                            message.getUsername(),
+                            message.getContent().replace("@공지 ", ""),
+                            message.getTime(),
+                            message.getOnlineCount(),
+                            message.getOnlineUsers());
         }
 
         logger.info("Message from " + message.getUsername());
@@ -93,11 +87,12 @@ public class OpenChatWebSocketChatServer {
         logger.info("Close session id : " + session.getId() + ", username : " + username);
 
         onlineSessions.remove(username);
-        Message message = new LeaveMessage(
-                username,
-                sdf.format(new Date()),
-                onlineSessions.size(),
-                onlineSessions.keySet().toString());
+        Message message =
+                new LeaveMessage(
+                        username,
+                        sdf.format(new Date()),
+                        onlineSessions.size(),
+                        onlineSessions.keySet().toString());
 
         saveAndSendMessage(message);
     }

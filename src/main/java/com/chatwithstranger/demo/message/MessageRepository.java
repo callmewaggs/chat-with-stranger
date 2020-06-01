@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    Optional<Message> findMessageByContent(String content);
+  Optional<Message> findMessageByContent(String content);
 }

@@ -4,10 +4,11 @@ import javax.persistence.Entity;
 
 @Entity
 public class ResourceMessage extends Message {
-    private ResourceMessage() {
-    }
+  private ResourceMessage() {
+  }
 
-    public ResourceMessage(String username, String time, int onlineCount, String onlineUsers, String resource) {
-        super(username, "RESOURCE", resource, time, onlineCount, onlineUsers);
-    }
+  public ResourceMessage(
+          String username, String time, int onlineCount, String onlineUsers, String resource) {
+    super(username, "RESOURCE", resource, time, onlineCount, onlineUsers);
+  }
 }

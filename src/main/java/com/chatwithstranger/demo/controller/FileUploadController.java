@@ -22,10 +22,11 @@ public class FileUploadController {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd HH:mm");
 
     @PostMapping("/upload")
-    public void fileUploadHandler(@RequestParam("file") MultipartFile file, @RequestParam("sender") String username) throws IOException {
+    public void fileUploadHandler(
+            @RequestParam("file") MultipartFile file, @RequestParam("sender") String username)
+            throws IOException {
 
-        if (file.isEmpty())
-            throw new IllegalArgumentException("File is empty!");
+        if (file.isEmpty()) throw new IllegalArgumentException("File is empty!");
 
         logger.info("Original File Name : " + file.getOriginalFilename());
         logger.info("Original File Size : " + file.getSize());
@@ -36,26 +37,29 @@ public class FileUploadController {
         // Creating the directory to store file
         String rootPath = ".";
         File dir = new File(rootPath + File.separator + "upload");
-        if (!dir.exists())
-            dir.mkdirs();
+        if (!dir.exists()) dir.mkdirs();
 
         // Create the file on server
-        File serverFile = new File(dir.getAbsolutePath()
-                + File.separator + file.getOriginalFilename());
+        File serverFile = new File(dir.getAbsolutePath() + File.separator + file.getOriginalFilename());
         BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
         stream.write(bytes);
         stream.close();
 
         logger.info("Server File Path : " + serverFile.getAbsolutePath());
 
-
-        Message message = new ResourceMessage(username, sdf.format(new Date()), 0, ""
-                , "http://localhost:8080/upload/" + file.getOriginalFilename());
+        Message message =
+                new ResourceMessage(
+                        username,
+                        sdf.format(new Date()),
+                        0,
+                        "",
+                        "http://localhost:8080/upload/" + file.getOriginalFilename());
         OpenChatWebSocketChatServer.sendMessageToAll(message);
     }
 
-    @GetMapping(value = "/upload/{filename}"
-            , produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.IMAGE_JPEG_VALUE})
+    @GetMapping(
+            value = "/upload/{filename}",
+            produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, MediaType.IMAGE_JPEG_VALUE})
     public byte[] getUploadedFile(@PathVariable String filename) throws IOException {
         File file = new File("./upload/" + filename);
         InputStream inputStream = Files.newInputStream(file.toPath(), StandardOpenOption.READ);
