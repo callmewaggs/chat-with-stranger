@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 
 @Entity
 public class ResourceMessage extends Message {
+
   private ResourceMessage() {
   }
 

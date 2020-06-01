@@ -1,30 +1,34 @@
 package com.chatwithstranger.demo.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.chatwithstranger.demo.service.MessageService;
 import com.chatwithstranger.demo.service.MessageServiceFactory;
-import com.chatwithstranger.demo.websocket.OpenChatWebSocketChatServer;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-
-import javax.websocket.RemoteEndpoint.Basic;
-import javax.websocket.Session;
+import com.chatwithstranger.demo.websocket.WebSocketServer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.websocket.RemoteEndpoint.Basic;
+import javax.websocket.Session;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-public class OpenChatWebSocketChatServerTest {
+public class WebSocketServerTest {
 
     private static Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
 
     private Basic endpoint;
     private Session session;
-    private OpenChatWebSocketChatServer server;
+  private WebSocketServer server;
     private ArgumentCaptor<String> captor;
     private String username;
 
@@ -32,7 +36,7 @@ public class OpenChatWebSocketChatServerTest {
     public void setUp() {
         MessageServiceFactory.init(mock(MessageService.class));
         username = "test";
-        server = new OpenChatWebSocketChatServer();
+      server = new WebSocketServer();
         captor = ArgumentCaptor.forClass(String.class);
         endpoint = mock(Basic.class);
         session = createSession(username, endpoint);

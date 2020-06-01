@@ -1,44 +1,44 @@
 package com.chatwithstranger.demo.user;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 public class User {
-    @Id
-    @Column(nullable = false)
-    private String username;
 
-    @Column(nullable = false)
-    private String password;
+  @Id
+  @Column(nullable = false)
+  private String username;
 
-    @Column(nullable = false)
-    private String lastLogin;
+  @Column(nullable = false)
+  private String password;
 
-    private User() {
-    }
+  @Column(nullable = false)
+  private String lastLogin;
 
-    private User(String username, String password, String lastLogin) {
-        this.username = username;
-        this.password = password;
-        this.lastLogin = lastLogin;
-    }
+  private User() {
+  }
 
-    public static User createWithAllArgs(String username, String password, String lastLogin) {
-        return new User(username, password, lastLogin);
-    }
+  private User(String username, String password, String lastLogin) {
+    this.username = username;
+    this.password = password;
+    this.lastLogin = lastLogin;
+  }
 
-    public static User createWithoutLastLogin(String username, String password) {
-        return new User(username, password, null);
-    }
+  public static User createWithAllArgs(String username, String password, String lastLogin) {
+    return new User(username, password, lastLogin);
+  }
 
-    public static User createInitialUser() {
-        return new User(null, null, null);
-    }
+  public static User createWithoutLastLogin(String username, String password) {
+    return new User(username, password, null);
+  }
+
+  public static User createInitialUser() {
+    return new User(null, null, null);
+  }
 }
