@@ -95,3 +95,37 @@ WebSocketServer 에서 사용한 메서드는 다음과 같습니다.
 ### 비동기 처리
 
 랜덤 채팅방에 있어서 채팅 요청 부터 채팅 형성까지는 비동기로 대기하고 있고, 채팅방이 형성되면 websocket으로 메시지를 주고받는 식으로 구현하기 위해 먼저 비동기 개념에 대해 공부했습니다.
+
+### STOMP 프로토콜
+
+랜덤 채팅방을 만들 때는 STOMP 프로토콜을 사용하려고 했습니다.
+
+__STOMP__ 는 Simple/Streaming Text Oriented Messaging Protocol의 약자이며, 텍스트 기반의 메세징 프로토콜입니다. HTTP에 모델링된 frame 기반 프로토콜이므로 다음과 같은 Command 들을 지원합니다.
+
+#### STOMP Commands
+ * CONNECT
+ * SEND
+ * SUBSCRIBE
+ * UNSUBSCRIBE
+ * BEGIN
+ * COMMIT
+ * ABORT
+ * ACK
+ * NACK
+ * DISCONNECT
+
+#### STOMP 구성
+
+ <img width="237" alt="Screen Shot 2020-06-02 at 5 03 24 PM" src="https://user-images.githubusercontent.com/35681772/83495712-0a988f80-a4f3-11ea-9357-deafd270d232.png">
+
+ * Command -> String
+ * Headers -> JavaScript Object
+ * Body -> String
+
+#### STOMP 구조
+
+<img width="665" alt="Screen Shot 2020-06-02 at 5 06 19 PM" src="https://user-images.githubusercontent.com/35681772/83496003-682cdc00-a4f3-11ea-8ecb-b934aa78627d.png">
+
+STOMP는 구독이라는 개념을 통해 내가 통신하고자 하는 주체(topic)를 판단하여 브로커라는 개념을 두어 실시간, 지속적으로 관심을 가지며 해당 요청이 들어오면 처리하게 됩니다. 이 과정은 MessageHandler를 구현하여 처리합니다.
+
+이 내용은 [Spring Guide](https://spring.io/guides/gs/messaging-stomp-websocket/) 를 바탕으로 공부 및 작성했습니다.
