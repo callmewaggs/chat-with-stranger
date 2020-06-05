@@ -129,3 +129,47 @@ __STOMP__ 는 Simple/Streaming Text Oriented Messaging Protocol의 약자이며,
 STOMP는 구독이라는 개념을 통해 내가 통신하고자 하는 주체(topic)를 판단하여 브로커라는 개념을 두어 실시간, 지속적으로 관심을 가지며 해당 요청이 들어오면 처리하게 됩니다. 이 과정은 MessageHandler를 구현하여 처리합니다.
 
 이 내용은 [Spring Guide](https://spring.io/guides/gs/messaging-stomp-websocket/) 를 바탕으로 공부 및 작성했습니다.
+
+### Troubleshooting
+
+파일 전송에 있어 대부분의 사진과 같은 파일은 잘 전송이 되었지만, 영화와 같은 4GB 이상의 __대용량 파일 전송__ 에 있어 업로드가 안되는 상황이 발생하였습니다.
+
+<img width="1160" alt="Screen Shot 2020-06-05 at 7 10 20 PM" src="https://user-images.githubusercontent.com/35681772/83864868-5439e200-a760-11ea-8112-f40f773094b0.png">
+
+OutOfMemoryError 유형으로는 다음과 같은 것들이 있었습니다.
+
+1. Java heap space
+   - 말 그대로 자바 힙이 일시적인 과도한 요구 또는 지속적인 누수로 인해 더 이상 요청한 메모리를 할당할 수 없을 때 발생합니다. 특정 프로그램에서 한번에 많은 메모리를 할당하는 경우라면 -Xmx 옵션으로 힙 크기를 늘려서 해결할 수 있으나, 지속적 누수로 인한 경우라면 heap dump를 떠서 누수 포인트를 찾아야 합니다.
+   - 일부 업로드 프로그램에서 메모리에다 전송된 파일을 전부 올리는 경우가 있는데, 파일에다 쓰는 방식으로 변경하거나 업로드 최대 용량을 제한하는 방식으로 개선해야 합니다.
+   - heap dump 받은 후 분석을 필요로 합니다.
+ 
+2. PermGen space
+   - JVM 메모리는 young gen, old gen, permanent gen으로 나뉘며, permanent 영역에는 class, method 객체가 저장됩니다. WAS의 경우 수 많은 클래스들을 적재하게 되므로 permanent 영역을 많이 쓰게 되는데, 특히 어플리케이션 deploy/re-deploy 에 있어 OutOfMemoryError: PermGen space를 많이 겪게 됩니다. 
+   - 이 때는 -XX:MaxPermSize 값을 올려줌으로써 해결 가능합니다.
+   - 보통 기본값은 64m이므로 -XX:MaxPermSize=128m 또는 -XX:MaxPermSize=256m으로 설정합니다.
+ 
+3. requested {size} bytes for {reason}. Out of swap space
+   - JVM은 자바 힙 외에도 자체 구동을 위해 native heap을 사용합니다. 이 에러는 native heap이 부족할 때 발생합니다. 에러 메시지의 Out of swap space를 보고 단순히 swap을 늘리는 경우도 있는데, 메모리가 부족해 swap을 쓰게 될 경우 성능이 급격히 저하되므로 그 보다는 왜 swap이 필요하게 됐는지부터 찾아 원인을 제거하는 편이 바람직합니다.
+ 
+   - 일단 JVM 힙 크기를 정할 때는 swap이 일어나지 않도록 가용한 물리적 메모리 안에서 결정해야 합니다. 이 때 조심할 점은 JVM 힙은 java 프로세스가 사용하는 메모리 중의 일부일 뿐이라는 겻을 염두에 둬야합니다.
+ 
+   - java 프로세스 메모리 = heap 크기 + PermGen 크기 + (thread 개수 * thread stack 크기) + JVM C 메모리 로 계산 가능합니다.
+ 
+   - 만약 가용 메모리가 1G가 남아있는데 -Xmx1g로 설정한다면 OutOfMemoryError는 피할 수 없게 될 것입니다. 
+   - 따라서 다음과 같이 조치가 가능합니다.
+     - java heap 크기를 줄인다. (-Xmx512m)
+     - thread 수를 줄이거나 thread stack size를 줄인다. -Xss256k, -XXThreadStackSize=256k (Solaris)
+     - JNI를 사용한다면 해당 모듈에 memory leak이 있는지 확인
+ 
+4. unable to create new native thread
+   - 이는 OS에서 어떤 이유로 쓰레드를 생성하는데 실패했을 때 발생합니다. 메모리가 부족해서일 수도 있고, OS에서 쓰레드 개수를 제한해서 일 수도 있습니다. top으로 확인했을 때 free 메모리가 많이 남아 있다면 OS에서 건 제한이 원인일 확률이 높습니다.
+     - 메모리가 원인이라면 (3)번의 해결책을 동일하게 적용할 수 있습니다.
+     - HP-UX라면 다음 커널 파러미터를 확인합니다.
+          - max_thread_proc (# of threads per process)
+          - nkthread (total number of threads)
+          - ex) kmtune | grep max_thread_proc
+
+결과적으로 스프링 파일 최대크기를 업로드 할 파일보다 여유롭게 설정했음에도 에러가 난 원인은 __파일을 업로드__ 하게 되면 해당 내용을 우선 __메모리에 담게 되고__ 다 담은 후 메모리에 있는 내용을 was에 전달한 뒤 HttpServletRequest 로 넘어오게 됩니다. 그런데 파일을 업로드 하면서 메모리에 파일이 써지다가 메모리 부족으로 Out Of Memory 에러가 발생하게 되버린 것이었습니다.
+
+따라서 WAS가 파일 업로드를 처리하는것 보다는 static 파일을 처리할 수 있는 별도의 웹서버를 만드는게 수월할 것이라 판단됩니다. 상황에 따라 웹서버에서 파일을 업로드 한 뒤 비동기로 파일 업로드 완료여부에 따라 WAS에서 처리를 할 수도 있겠습니다.
+
